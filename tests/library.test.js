@@ -1,6 +1,8 @@
 // Jest Tests - Library Management System
 // Incomplete and with errors
 
+import { Book, DigitalBook, Member, PremiumMember, findBookByISBN, calculateFineAmount } from "../src/library.js";
+
 describe('Book Class', () => {
     test('should create a book instance', () => {
         var book = new Book('978-0-123', 'Test Book', 'Author Name', 2020, 5);

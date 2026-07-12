@@ -1,13 +1,23 @@
 // Library Management System - Starter Code with Complex Errors
 
 // Global state management (scoping issues)
-books = [];  // Missing declaration
-var members = [];  // Wrong: should use let
-const LATE_FEE_PER_DAY = 0.50;
-MAX_BOOKS_PER_MEMBER = 5;  // Missing const
+export let books = [];  // Missing declaration
+export var members = [];  // Wrong: should use let
+export const LATE_FEE_PER_DAY = 0.50;
+export const MAX_BOOKS_PER_MEMBER = 5;  // Missing const
+
+// Setters exist because ES module imports are read-only bindings in the
+// importing module — storage.js can't do `books = ...` directly.
+export function setBooks(newBooks) {
+    books = newBooks;
+}
+
+export function setMembers(newMembers) {
+    members = newMembers;
+}
 
 // Book class with multiple issues
-class Book {
+export class Book {
     constructor(isbn, title, author, year, copies) {
         this.isbn = isbn;
         this.title = title;
@@ -28,7 +38,7 @@ class Book {
 }
 
 // Digital book class with inheritance problems
-class DigitalBook extends Book {
+export class DigitalBook extends Book {
     constructor(isbn, title, author, year, fileSize, format) {
         // Missing: super() call with correct parameters
         this.fileSize = fileSize;
@@ -43,7 +53,7 @@ class DigitalBook extends Book {
 }
 
 // Member class with errors
-class Member {
+export class Member {
     constructor(id, name, email, membershipType) {
         this.id = id;
         this.name = name;
@@ -66,7 +76,7 @@ class Member {
 }
 
 // Premium member with inheritance issues
-class PremiumMember extends Member {
+export class PremiumMember extends Member {
     constructor(id, name, email) {
         super(id, name, email, "premium");
         // Missing: additional premium benefits properties
@@ -76,7 +86,7 @@ class PremiumMember extends Member {
 }
 
 // Complex function with nested loops and errors
-function findOverdueBooks(daysOverdue) {
+export function findOverdueBooks(daysOverdue) {
     var overdue = [];
     
     // Inefficient nested loops - should be optimized
@@ -93,7 +103,7 @@ function findOverdueBooks(daysOverdue) {
 }
 
 // Function with while loop error
-function processReturnQueue(queue) {
+export function processReturnQueue(queue) {
     var index = 0;
     
     // Infinite loop potential
@@ -108,7 +118,7 @@ function processReturnQueue(queue) {
 }
 
 // Recursive function with multiple errors
-function searchBooksByCategory(bookList, category, index) {
+export function searchBooksByCategory(bookList, category, index) {
     // Missing: base case
     // Missing: undefined/null checks
     // Wrong comparison
@@ -121,7 +131,7 @@ function searchBooksByCategory(bookList, category, index) {
 }
 
 // Function missing array methods
-function getBooksByAuthor(authorName) {
+export function getBooksByAuthor(authorName) {
     var result = [];
     
     // Should use filter method
@@ -135,7 +145,7 @@ function getBooksByAuthor(authorName) {
 }
 
 // Function that should use reduce
-function calculateTotalLateFees(memberRecord) {
+export function calculateTotalLateFees(memberRecord) {
     var total = 0;
     
     // Should use reduce on array
@@ -147,7 +157,7 @@ function calculateTotalLateFees(memberRecord) {
 }
 
 // Function missing spread operator
-function combineBookCollections(fiction, nonFiction, reference) {
+export function combineBookCollections(fiction, nonFiction, reference) {
     // Should use spread operator
     var combined = [];
     
@@ -159,7 +169,7 @@ function combineBookCollections(fiction, nonFiction, reference) {
 }
 
 // Function missing rest parameters
-function addMultipleBooks(book1, book2, book3) {
+export function addMultipleBooks(book1, book2, book3) {
     // Should use rest parameters to accept unlimited books
     books.push(book1);
     books.push(book2);
@@ -167,7 +177,7 @@ function addMultipleBooks(book1, book2, book3) {
 }
 
 // Function missing destructuring
-function updateMemberInfo(member, updates) {
+export function updateMemberInfo(member, updates) {
     // Should destructure updates object
     member.name = updates.name;
     member.email = updates.email;
@@ -177,7 +187,7 @@ function updateMemberInfo(member, updates) {
 }
 
 // Function with no error handling
-function borrowBook(memberId, isbn) {
+export function borrowBook(memberId, isbn) {
     // Missing: try-catch block
     // Missing: validation for undefined/null
     // Missing: typeof checks
@@ -196,7 +206,7 @@ function borrowBook(memberId, isbn) {
 }
 
 // Helper functions with errors
-function findMemberById(id) {
+export function findMemberById(id) {
     // Should use find method
     for (var i = 0; i < members.length; i++) {
         if (members[i].id = id) {  // Wrong operator
@@ -206,7 +216,7 @@ function findMemberById(id) {
     // Returns undefined implicitly - should handle explicitly
 }
 
-function findBookByISBN(isbn) {
+export function findBookByISBN(isbn) {
     var i = 0;
     
     // Wrong loop choice
@@ -221,7 +231,7 @@ function findBookByISBN(isbn) {
 }
 
 // Statistics object with missing methods
-var LibraryStats = {
+export var LibraryStats = {
     totalBooks: 0,
     totalMembers: 0,
     totalBorrowings: 0,
@@ -252,7 +262,7 @@ var LibraryStats = {
 };
 
 // Function with string manipulation errors
-function formatBookInfo(book) {
+export function formatBookInfo(book) {
     // Should use template literals
     var info = "Title: " + book.title + "\n";
     info = info + "Author: " + book.author + "\n";
@@ -264,7 +274,7 @@ function formatBookInfo(book) {
 }
 
 // Function with number/type issues
-function calculateFineAmount(daysLate) {
+export function calculateFineAmount(daysLate) {
     // Missing: typeof check
     // Missing: NaN handling
     // Missing: null/undefined check
@@ -275,5 +285,4 @@ function calculateFineAmount(daysLate) {
     return fine;
 }
 
-// Missing: module exports
 // Missing: proper data structure for ISBN lookups (Map/Set)
