@@ -1,0 +1,166 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #f4f4f5;
+    color: #1f2933;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+button {
+    cursor: pointer;
+    border: 1px solid #cbd2d9;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+button:hover {
+    background: #e9ecef;
+}
+
+section {
+    background: #ffffff;
+    border: 1px solid #e4e7eb;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.controls input,
+.controls select {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.5rem;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
+}
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.book-card {
+    border: 1px solid #e4e7eb;
+    border-radius: 6px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease;
+}
+
+.book-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.book-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+.book-card p {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #52606d;
+}
+
+#book-details:empty {
+    display: none;
+}
+
+.book-details {
+    border-top: 1px dashed #cbd2d9;
+    padding-top: 1rem;
+}
+
+#borrow-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+#borrow-form input {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.5rem;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
+}
+
+#member-form form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+#member-form input {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.5rem;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    text-align: center;
+    border: 1px solid #e4e7eb;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.stat-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #52606d;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
