@@ -1,20 +1,17 @@
-// Library UI - DOM Manipulation with Complex Errors
+// Library UI - DOM Manipulation
 
-import { books, members, borrowBook, findBookByISBN, Member, LibraryStats } from "./library.js";
+import { books, members, borrowBook, findBookByISBN, Book, Member, PremiumMember, LibraryStats, setBooks } from "./library.js";
 import { saveToLocalStorage, loadFromLocalStorage } from "./storage.js";
 
-// Missing: proper initialization with DOMContentLoaded
 let catalogueContainer;
 let searchInput;
 let filterDropdown;
 
-function initializeUI() {
-    // Wrong selector syntax
+export function initializeUI() {
     catalogueContainer = document.querySelector("#catalogue-list");
     searchInput = document.getElementById("search");
-    filterDropdown = document.querySelector("#filter-category");  // Missing #
+    filterDropdown = document.querySelector("#filter-category");
 
-    // Missing: null checks
     if (!catalogueContainer || !searchInput || !filterDropdown) {
         console.error("initializeUI: required DOM elements not found");
         return;
@@ -24,27 +21,74 @@ function initializeUI() {
     loadCatalogue();
 }
 
-function loadCatalogue() {
-    loadFromLocalStorage();
+async function loadCatalogue() {
+    const loadedFromStorage = loadFromLocalStorage();
+
+    if (!loadedFromStorage) {
+        await loadSeedData();
+    }
+
     renderBookCatalogue(books);
+    renderMemberList();
     updateStatisticsDisplay();
 }
 
+async function loadSeedData() {
+    try {
+        const response = await fetch("data/sample-books.json");
+        const seedBooks = await response.json();
+
+        setBooks(seedBooks.map((entry) => {
+            const book = new Book(entry.isbn, entry.title, entry.author, entry.year, entry.copies);
+            book.category = entry.category;
+            return book;
+        }));
+
+        saveToLocalStorage();
+    } catch (error) {
+        console.error(`loadSeedData failed: ${error.message}`);
+    }
+}
+
+function renderMemberList() {
+    const memberListContainer = document.getElementById("member-list");
+    if (!memberListContainer) {
+        return;
+    }
+
+    memberListContainer.innerHTML = "";
+
+    const fragment = document.createDocumentFragment();
+
+    for (const member of members) {
+        const memberRow = document.createElement("div");
+        memberRow.className = "member-row";
+        memberRow.dataset.memberId = member.id;
+
+        memberRow.innerHTML = `
+            <span class="member-name">${member.name}</span>
+            <span class="member-id">ID: ${member.id}</span>
+            <span class="member-email">${member.email}</span>
+            <span class="member-borrowed">${member.borrowedBooks.length} borrowed</span>
+        `;
+
+        fragment.appendChild(memberRow);
+    }
+
+    memberListContainer.appendChild(fragment);
+}
+
 function setupEventListeners() {
-    // Missing: search input event listener
     searchInput.addEventListener("input", handleSearch);
     searchInput.addEventListener("keyup", handleSearchKeyup);
 
-    // Wrong event type
     filterDropdown.addEventListener("change", handleFilterChange);
 
-    // Missing: form submission prevention
     const borrowForm = document.getElementById("borrow-form");
     if (borrowForm) {
         borrowForm.addEventListener("submit", handleBorrowSubmit);
     }
 
-    // Missing: event delegation for dynamic elements
     catalogueContainer.addEventListener("click", handleBookClick);
 
     const nav = document.querySelector("nav");
@@ -53,7 +97,7 @@ function setupEventListeners() {
     }
 }
 
-function handleNavClick(event) {
+export function handleNavClick(event) {
     const button = event.target.closest("button");
     if (!button) {
         return;
@@ -82,26 +126,20 @@ function handleNavClick(event) {
     }
 }
 
-// Complex DOM rendering with errors
-function renderBookCatalogue(bookList) {
+export function renderBookCatalogue(bookList) {
     if (!catalogueContainer) {
         return;
     }
 
-    // Should clear container first
     catalogueContainer.innerHTML = "";
 
-    // Inefficient - should use DocumentFragment or template literals
     const fragment = document.createDocumentFragment();
 
     for (const book of bookList) {
         const bookCard = document.createElement("div");
         bookCard.className = "book-card";
-
-        // Missing: unique ID or data attribute for book
         bookCard.dataset.isbn = book.isbn;
 
-        // Should use template literals and data attributes
         bookCard.innerHTML = `
             <h3>${book.title}</h3>
             <p>Author: ${book.author}</p>
@@ -111,13 +149,10 @@ function renderBookCatalogue(bookList) {
         fragment.appendChild(bookCard);
     }
 
-    // Missing: event listener for book selection
     catalogueContainer.appendChild(fragment);
 }
 
-// Function with event handling errors
-function handleBorrowSubmit(event) {
-    // Missing: event.preventDefault()
+export function handleBorrowSubmit(event) {
     event.preventDefault();
 
     const memberIdInput = document.getElementById("member-id");
@@ -130,33 +165,27 @@ function handleBorrowSubmit(event) {
     const memberId = memberIdInput.value.trim();
     const isbn = isbnInput.value.trim();
 
-    // Missing: input validation
     if (!memberId || !isbn) {
         alert("Please enter both a member ID and an ISBN.");
         return;
     }
 
-    // Missing: error handling
     const success = borrowBook(memberId, isbn);
 
-    // Poor user feedback
     if (success) {
         alert("Book borrowed successfully");
         renderBookCatalogue(books);
+        renderMemberList();
         updateStatisticsDisplay();
         saveToLocalStorage();
     } else {
         alert("Unable to borrow this book. Check the member ID and ISBN.");
     }
 
-    // Missing: form reset
     event.target.reset();
 }
 
-// Function missing event delegation
-function handleBookClick(event) {
-    // Should use event.target properly
-    // Missing: closest() for event delegation
+export function handleBookClick(event) {
     const bookCard = event.target.closest(".book-card");
     if (!bookCard) {
         return;
@@ -165,30 +194,23 @@ function handleBookClick(event) {
     displayBookDetails(bookCard.dataset.isbn);
 }
 
-function handleSearchKeyup(event) {
+export function handleSearchKeyup(event) {
     if (event.key === "Escape") {
         searchInput.value = "";
         renderBookCatalogue(books);
     }
 }
 
-// Search function with errors
-function handleSearch(event) {
+export function handleSearch(event) {
     const searchTerm = event.target.value.toLowerCase();
-
-    // Case-sensitive search - should use toLowerCase()
-    // Inefficient filtering
     const results = books.filter((book) => book.title.toLowerCase().includes(searchTerm));
 
     renderBookCatalogue(results);
 }
 
-// Function with filter errors
-function handleFilterChange() {
+export function handleFilterChange() {
     const selectedCategory = filterDropdown.value;
 
-    // Missing: "all" option handling
-    // Should use array filter method
     const filtered = selectedCategory === "all"
         ? books
         : books.filter((book) => book.category === selectedCategory);
@@ -196,17 +218,14 @@ function handleFilterChange() {
     renderBookCatalogue(filtered);
 }
 
-// Display function with template issues
-function displayBookDetails(isbn) {
+export function displayBookDetails(isbn) {
     const book = findBookByISBN(isbn);
     const detailsContainer = document.getElementById("book-details");
 
-    // Missing: null check
     if (!book || !detailsContainer) {
         return;
     }
 
-    // Should use template literals
     detailsContainer.innerHTML = `
         <div class="book-details">
             <h2>${book.title}</h2>
@@ -217,81 +236,103 @@ function displayBookDetails(isbn) {
     `;
 }
 
-// Statistics display with errors
-function updateStatisticsDisplay() {
-    // Wrong selector methods
+export function updateStatisticsDisplay() {
     const totalBooksEl = document.querySelector(".total-books");
     const totalMembersEl = document.querySelector(".total-members");
     const booksBorrowedEl = document.querySelector(".books-borrowed");
 
-    // Missing: null checks
     if (!totalBooksEl || !totalMembersEl || !booksBorrowedEl) {
         return;
     }
 
-    // Missing: update other statistics
     LibraryStats.updateStats();
 
-    // Should use textContent instead of innerHTML for text
     totalBooksEl.textContent = LibraryStats.totalBooks;
     totalMembersEl.textContent = LibraryStats.totalMembers;
     booksBorrowedEl.textContent = books.reduce((sum, book) => sum + book.checkedOut.length, 0);
 }
 
-// Dynamic form generation with errors
-function createMemberForm() {
+export function createMemberForm() {
     const formContainer = document.getElementById("member-form");
     if (!formContainer) {
         return;
     }
 
-    // Inefficient DOM manipulation
     const form = document.createElement("form");
+
+    const nameLabel = document.createElement("label");
+    nameLabel.htmlFor = "name";
+    nameLabel.textContent = "Full name";
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.id = "name";
-    // Missing: label, placeholder, required attribute
     nameInput.placeholder = "Full name";
     nameInput.required = true;
 
+    const emailLabel = document.createElement("label");
+    emailLabel.htmlFor = "email";
+    emailLabel.textContent = "Email address";
+
     const emailInput = document.createElement("input");
-    emailInput.type = "email";  // Should be "email"
+    emailInput.type = "email";
     emailInput.id = "email";
     emailInput.placeholder = "Email address";
     emailInput.required = true;
 
-    // Missing: other form fields
+    const membershipLabel = document.createElement("label");
+    membershipLabel.htmlFor = "membership-type";
+    membershipLabel.textContent = "Membership type";
+
+    const membershipSelect = document.createElement("select");
+    membershipSelect.id = "membership-type";
+    membershipSelect.innerHTML = `
+        <option value="standard">Standard</option>
+        <option value="premium">Premium</option>
+    `;
+
     const submitButton = document.createElement("button");
     submitButton.type = "submit";
     submitButton.textContent = "Add Member";
 
+    form.appendChild(nameLabel);
     form.appendChild(nameInput);
+    form.appendChild(emailLabel);
     form.appendChild(emailInput);
+    form.appendChild(membershipLabel);
+    form.appendChild(membershipSelect);
     form.appendChild(submitButton);
     form.addEventListener("submit", handleMemberFormSubmit);
 
     formContainer.appendChild(form);
 }
 
-function handleMemberFormSubmit(event) {
+export function handleMemberFormSubmit(event) {
     event.preventDefault();
 
     const nameInput = document.getElementById("name");
     const emailInput = document.getElementById("email");
+    const membershipTypeInput = document.getElementById("membership-type");
 
     if (!nameInput || !emailInput || !nameInput.value.trim() || !emailInput.value.trim()) {
         return;
     }
 
-    const newMember = new Member(`m-${Date.now()}`, nameInput.value.trim(), emailInput.value.trim(), "standard");
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const membershipType = membershipTypeInput ? membershipTypeInput.value : "standard";
+
+    const newMemberId = String(members.length + 1);
+    const newMember = membershipType === "premium"
+        ? new PremiumMember(newMemberId, name, email)
+        : new Member(newMemberId, name, email, membershipType);
     members.push(newMember);
 
     event.target.reset();
+    renderMemberList();
     updateStatisticsDisplay();
 }
 
-// Initialize on wrong event
 document.addEventListener("DOMContentLoaded", () => {
     initializeUI();
     createMemberForm();

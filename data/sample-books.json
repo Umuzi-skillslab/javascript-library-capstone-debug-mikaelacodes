@@ -1,0 +1,66 @@
+[
+    {
+        "isbn": "978-0-001",
+        "title": "Fourth Wing",
+        "author": "Rebecca Yarros",
+        "year": 2023,
+        "copies": 4,
+        "category": "fiction"
+    },
+    {
+        "isbn": "978-0-002",
+        "title": "It Ends with Us",
+        "author": "Colleen Hoover",
+        "year": 2016,
+        "copies": 3,
+        "category": "fiction"
+    },
+    {
+        "isbn": "978-0-003",
+        "title": "The Seven Husbands of Evelyn Hugo",
+        "author": "Taylor Jenkins Reid",
+        "year": 2017,
+        "copies": 3,
+        "category": "fiction"
+    },
+    {
+        "isbn": "978-0-004",
+        "title": "Six of Crows",
+        "author": "Leigh Bardugo",
+        "year": 2015,
+        "copies": 2,
+        "category": "fiction"
+    },
+    {
+        "isbn": "978-0-005",
+        "title": "Heartstopper: Volume One",
+        "author": "Alice Oseman",
+        "year": 2019,
+        "copies": 2,
+        "category": "fiction"
+    },
+    {
+        "isbn": "978-0-006",
+        "title": "The Song of Achilles",
+        "author": "Madeline Miller",
+        "year": 2011,
+        "copies": 2,
+        "category": "fiction"
+    },
+    {
+        "isbn": "978-0-007",
+        "title": "Atomic Habits",
+        "author": "James Clear",
+        "year": 2018,
+        "copies": 3,
+        "category": "non-fiction"
+    },
+    {
+        "isbn": "978-0-008",
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "year": 2008,
+        "copies": 3,
+        "category": "fiction"
+    }
+]

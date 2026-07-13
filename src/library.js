@@ -1,45 +1,43 @@
-// Library Management System - Starter Code with Complex Errors
+// Library Management System
 
-// Global state management (scoping issues)
-export let books = [];  // Missing declaration
-export let members = [];  // Wrong: should use let
+export let books = [];
+export let members = [];
 export const LATE_FEE_PER_DAY = 0.50;
-export const MAX_BOOKS_PER_MEMBER = 5;  // Missing const
+export const MAX_BOOKS_PER_MEMBER = 5;
 export const PREMIUM_MAX_BOOKS = 10;
+
+// Kept in sync with `books` so findBookByISBN is an O(1) lookup instead of a scan.
+let booksByIsbn = new Map();
 
 export function setBooks(newBooks) {
     books = newBooks;
+    booksByIsbn = new Map(newBooks.map((book) => [book.isbn, book]));
 }
 
 export function setMembers(newMembers) {
     members = newMembers;
 }
 
-// Book class with multiple issues
 export class Book {
     constructor(isbn, title, author, year, copies) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
         this.year = year;
-        // Missing: availableCopies and totalCopies properties
         this.totalCopies = copies;
         this.availableCopies = copies;
         this.checkedOut = [];
     }
 
-    // Missing: method to check availability
     isAvailable() {
         return this.availableCopies > 0;
     }
 
-    // Missing: method to get book info using template literals
     getInfo() {
         return `${this.title} by ${this.author} (${this.year}) — ${this.availableCopies}/${this.totalCopies} available`;
     }
 
     checkOut(memberId) {
-        // No validation for available copies
         if (!this.isAvailable()) {
             return false;
         }
@@ -50,10 +48,8 @@ export class Book {
     }
 }
 
-// Digital book class with inheritance problems
 export class DigitalBook extends Book {
     constructor(isbn, title, author, year, fileSize, format) {
-        // Missing: super() call with correct parameters
         super(isbn, title, author, year, Infinity);
         this.fileSize = fileSize;
         this.format = format;
@@ -65,13 +61,33 @@ export class DigitalBook extends Book {
     }
 
     download(memberId) {
-        // Should override differently than physical checkout
         this.downloads = this.downloads + 1;
         this.checkedOut.push({ memberId, checkoutDate: new Date() });
     }
 }
 
-// Member class with errors
+// JSON.parse returns plain objects, not class instances, so anything read back
+// from storage needs to be rebuilt into a real Book/DigitalBook to regain its methods.
+export function reviveBook(data) {
+    const book = typeof data.format === "string"
+        ? new DigitalBook(data.isbn, data.title, data.author, data.year, data.fileSize, data.format)
+        : new Book(data.isbn, data.title, data.author, data.year, data.totalCopies);
+
+    book.availableCopies = data.availableCopies;
+    if (data.category) {
+        book.category = data.category;
+    }
+    if (typeof data.downloads === "number") {
+        book.downloads = data.downloads;
+    }
+    book.checkedOut = (data.checkedOut || []).map(({ memberId, checkoutDate }) => ({
+        memberId,
+        checkoutDate: new Date(checkoutDate)
+    }));
+
+    return book;
+}
+
 export class Member {
     constructor(id, name, email, membershipType, joinDate = new Date()) {
         this.id = id;
@@ -79,24 +95,20 @@ export class Member {
         this.email = email;
         this.membershipType = membershipType;
         this.borrowedBooks = [];
-        // Missing: joinDate property
         this.joinDate = joinDate;
     }
 
-    // Missing: method to calculate membership duration
     getMembershipDuration() {
         const msPerDay = 1000 * 60 * 60 * 24;
         return Math.floor((new Date() - this.joinDate) / msPerDay);
     }
 
-    // Missing: method using destructuring
     getMemberInfo() {
         const { id, name, email, membershipType } = this;
         return { id, name, email, membershipType };
     }
 
     canBorrow() {
-        // Wrong comparison operator
         if (this.borrowedBooks.length >= MAX_BOOKS_PER_MEMBER) {
             return false;
         }
@@ -104,16 +116,13 @@ export class Member {
     }
 }
 
-// Premium member with inheritance issues
 export class PremiumMember extends Member {
     constructor(id, name, email, joinDate = new Date()) {
         super(id, name, email, "premium", joinDate);
-        // Missing: additional premium benefits properties
         this.discountRate = 0.1;
         this.maxBooks = PREMIUM_MAX_BOOKS;
     }
 
-    // Should override canBorrow to allow more books
     canBorrow() {
         if (this.borrowedBooks.length >= this.maxBooks) {
             return false;
@@ -122,7 +131,19 @@ export class PremiumMember extends Member {
     }
 }
 
-// Complex function with nested loops and errors
+// Same problem as reviveBook: a member read back from storage is a plain
+// object until it's rebuilt into a real Member/PremiumMember instance.
+export function reviveMember(data) {
+    const joinDate = new Date(data.joinDate);
+    const member = data.membershipType === "premium"
+        ? new PremiumMember(data.id, data.name, data.email, joinDate)
+        : new Member(data.id, data.name, data.email, data.membershipType, joinDate);
+
+    member.borrowedBooks = data.borrowedBooks || [];
+
+    return member;
+}
+
 export function findOverdueBooks(daysOverdue, bookIndex = 0) {
     if (bookIndex >= books.length) {
         return [];
@@ -138,27 +159,21 @@ export function findOverdueBooks(daysOverdue, bookIndex = 0) {
     return overdueFromThisBook.concat(findOverdueBooks(daysOverdue, bookIndex + 1));
 }
 
-// Function with while loop error
 export function processReturnQueue(queue) {
     for (const item of queue) {
-        // Process item
         console.log(`Processing return: ${item}`);
     }
 }
 
-// Recursive function with multiple errors
 export function searchBooksByCategory(bookList, category, index = 0) {
-    // Missing: undefined/null checks
     if (!Array.isArray(bookList) || typeof category !== "string") {
         return [];
     }
 
-    // Missing: base case
     if (index >= bookList.length) {
         return [];
     }
 
-    // Wrong comparison
     if (bookList[index].category === category) {
         return [bookList[index]].concat(searchBooksByCategory(bookList, category, index + 1));
     }
@@ -166,36 +181,27 @@ export function searchBooksByCategory(bookList, category, index = 0) {
     return searchBooksByCategory(bookList, category, index + 1);
 }
 
-// Function missing array methods
 export function getBooksByAuthor(authorName) {
-    // Should use filter method
     return books.filter((book) => book.author === authorName);
 }
 
-// Function that should use reduce
 export function calculateTotalLateFees(memberRecord) {
-    // Should use reduce on array
     return memberRecord.overdueBooks.reduce(
         (total, overdueBook) => total + overdueBook.daysLate * LATE_FEE_PER_DAY,
         0
     );
 }
 
-// Function missing spread operator
 export function combineBookCollections(fiction, nonFiction, reference) {
-    // Should use spread operator
     return [...fiction, ...nonFiction, ...reference];
 }
 
-// Function missing rest parameters
 export function addMultipleBooks(...newBooks) {
-    // Should use rest parameters to accept unlimited books
     books.push(...newBooks);
+    newBooks.forEach((book) => booksByIsbn.set(book.isbn, book));
 }
 
-// Function missing destructuring
 export function updateMemberInfo(member, { name, email, membershipType }) {
-    // Should destructure updates object
     member.name = name;
     member.email = email;
     member.membershipType = membershipType;
@@ -203,16 +209,12 @@ export function updateMemberInfo(member, { name, email, membershipType }) {
     return member;
 }
 
-// Function with no error handling
 export function borrowBook(memberId, isbn) {
-    // Missing: try-catch block
     try {
-        // Missing: validation for undefined/null
         if (!memberId || !isbn) {
             throw new Error("memberId and isbn are required");
         }
 
-        // Missing: typeof checks
         if (typeof memberId !== "string" && typeof memberId !== "number") {
             throw new Error("memberId must be a string or number");
         }
@@ -223,7 +225,6 @@ export function borrowBook(memberId, isbn) {
         const member = findMemberById(memberId);
         const book = findBookByISBN(isbn);
 
-        // No check if member or book exists
         if (!member || !book) {
             return false;
         }
@@ -244,14 +245,11 @@ export function borrowBook(memberId, isbn) {
     }
 }
 
-// Helper functions with errors
 export function findMemberById(id) {
-    // Returns undefined implicitly - should handle explicitly
     if (id === null || id === undefined) {
         return null;
     }
 
-    // Should use find method
     return members.find((member) => member.id === id) || null;
 }
 
@@ -260,23 +258,14 @@ export function findBookByISBN(isbn) {
         return null;
     }
 
-    // Wrong loop choice
-    for (const book of books) {
-        if (book.isbn === isbn) {
-            return book;
-        }
-    }
-
-    return null;
+    return booksByIsbn.get(isbn) || null;
 }
 
-// Statistics object with missing methods
 export const LibraryStats = {
     totalBooks: 0,
     totalMembers: 0,
     totalBorrowings: 0,
 
-    // Missing: method using Math object for calculations
     getAverageCheckoutsPerBook: function() {
         if (books.length === 0) {
             return 0;
@@ -286,7 +275,6 @@ export const LibraryStats = {
         return Math.round((totalCheckouts / books.length) * 100) / 100;
     },
 
-    // Missing: method using for-of loop
     getAvailableBooksCount: function() {
         let count = 0;
 
@@ -299,7 +287,6 @@ export const LibraryStats = {
         return count;
     },
 
-    // Missing: method returning object with destructuring
     getSummary: function() {
         this.updateStats();
         const { totalBooks, totalMembers, totalBorrowings } = this;
@@ -320,7 +307,6 @@ export const LibraryStats = {
     },
 
     getMostPopularBook: function() {
-        // Inefficient implementation - should use reduce
         return books.reduce((popular, book) => {
             const popularCheckouts = popular ? popular.checkedOut.length : 0;
             return book.checkedOut.length > popularCheckouts ? book : popular;
@@ -328,29 +314,21 @@ export const LibraryStats = {
     }
 };
 
-// Function with string manipulation errors
 export function formatBookInfo(book) {
-    // Should use template literals
-    // Missing: proper string methods (trim, toUpperCase, etc.)
     return `Title: ${book.title.trim()}\nAuthor: ${book.author.trim()}\nYear: ${book.year}`;
 }
 
-// Function with number/type issues
 export function calculateFineAmount(daysLate) {
-    // Missing: null/undefined check
     if (daysLate === null || daysLate === undefined) {
         throw new Error("daysLate is required");
     }
 
-    // Missing: typeof check
-    // Missing: NaN handling
     if (typeof daysLate !== "number" || Number.isNaN(daysLate)) {
         throw new Error("daysLate must be a valid number");
     }
 
     const fine = daysLate * LATE_FEE_PER_DAY;
 
-    // Should use toFixed for currency
     return Number(fine.toFixed(2));
 }
 
@@ -377,5 +355,3 @@ export function createBookFilter(predicate) {
         return bookList.filter(predicate);
     };
 }
-
-// Missing: proper data structure for ISBN lookups (Map/Set)
